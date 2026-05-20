@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel book — Армения</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'CoFo Sans Mono Trial';
+      src: url('fonts/CoFoSansMono-Regular-Trial.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    :root {
+      --font: 'CoFo Sans Mono Trial', monospace;
+      --bg: #fffbf6;
+      --text: #000;
+      --fs: 20px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: var(--font);
+      font-size: var(--fs);
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    /* Fixed header nav */
+    .nav {
+      position: fixed;
+      top: 22px;
+      z-index: 20;
+      white-space: nowrap;
+      line-height: normal;
+    }
+    .nav-title    { left: 22px; }
+    .nav-country  { left: 243px; }
+    .nav-gallery  { left: 416px; }
+
+    /* Fixed coordinates block */
+    .coords {
+      position: fixed;
+      top: 74px;
+      left: 22px;
+      z-index: 20;
+      line-height: normal;
+    }
+    .coords p { margin: 0; }
+
+    /* Horizontal gallery strip — bottom-aligned */
+    .gallery {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      height: 88vh;
+      display: flex;
+      align-items: flex-end;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .gallery::-webkit-scrollbar { display: none; }
+
+    .gallery img {
+      display: block;
+      flex-shrink: 0;
+      width: auto;
+    }
+    .gallery img.landscape { height: 54vh; }
+    .gallery img.portrait  { height: 88vh; }
+
+    .gallery .photo-wrap { position: relative; flex-shrink: 0; }
+    .gallery .photo-wrap img { display: block; }
+    .gallery .photo-num { display: none; 
+      position: absolute; top: 8px; left: 8px;
+      background: rgba(0,0,0,0.6); color: #fff;
+      font-size: 14px; line-height: 1; padding: 4px 7px;
+      border-radius: 4px; pointer-events: none; z-index: 5;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 251, 246, 0.9);
+      z-index: 100;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-text-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-info {
+      font-family: var(--font);
+      font-size: 20px;
+      color: #000;
+      line-height: normal;
+      width: 192px;
+    }
+
+    .modal-photo-wrap {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .modal-img {
+      display: block;
+      max-height: 88vh;
+      max-width: 60vw;
+      object-fit: contain;
+    }
+
+    .modal-spacer {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .photo-wrap { cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <span class="nav nav-title">Travel book</span>
+  <span class="nav nav-country">Армения</span>
+  <span class="nav nav-gallery">Галлерея</span>
+
+  <!-- GPS coordinates -->
+  <div class="coords">
+    <p>40.189347, 44.515388</p>
+    <p>40.191203, 44.515553</p>
+    <p>40.191203, 44.515553</p>
+    <p>40.192414, 44.478374</p>
+    <p>40.194701, 44.473434</p>
+    <p>40.194701, 44.473434</p>
+    <p>40.194453, 44.471251</p>
+    <p>40.194701, 44.473434</p>
+    <p>40.194217, 44.473550</p>
+    <p>39.879122, 44.575120</p>
+    <p>40.184126, 44.497104</p>
+    <p>40.452492, 44.645551</p>
+    <p>40.461340, 44.649832</p>
+    <p>40.459910, 44.647875</p>
+    <p>40.559186, 44.992376</p>
+    <p>40.555443, 44.990234</p>
+    <p>40.558389, 44.991480</p>
+    <p>40.737584, 44.864817</p>
+    <p>40.738249, 44.870621</p>
+    <p>40.740049, 44.863534</p>
+    <p>40.739068, 44.874233</p>
+    <p>40.740638, 44.874662</p>
+    <p>40.740638, 44.874662</p>
+    <p>40.752270, 44.961519</p>
+    <p>40.192820, 44.480215</p>
+    <p>40.186428, 44.509741</p>
+    <p>40.188937, 44.519554</p>
+    <p>40.185151, 44.505797</p>
+    <p>40.175865, 44.518225</p>
+  </div>
+
+  <!-- Photo gallery — order matches Figma design -->
+  <div class="gallery" id="gallery">
+    <!-- 1: karmir_302297 1 — landscape 659×437 -->
+    <div class="photo-wrap" data-name="IMG_7847.JPG" data-coords="40.189347, 44.515388"><span class="photo-num">1</span><img class="landscape" src="images/1.png" width="659" height="437" alt=""></div>
+    <!-- 2: IMG_7801 2 — portrait 473×714 -->
+    <div class="photo-wrap" data-name="IMG_7809.JPG" data-coords="40.191203, 44.515553"><span class="photo-num">2</span><img class="portrait" src="images/2.png" width="473" height="714" alt=""></div>
+    <!-- 3: IMG_7723 1 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7892.JPG" data-coords="40.191203, 44.515553"><span class="photo-num">3</span><img class="landscape" src="images/3.png" width="659" height="435" alt=""></div>
+    <!-- 4: IMG_7723 2 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7815.JPG" data-coords="40.192414, 44.478374"><span class="photo-num">4</span><img class="landscape" src="images/4.png" width="659" height="435" alt=""></div>
+    <!-- 5: IMG_7723 3 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7861.JPG" data-coords="40.194701, 44.473434"><span class="photo-num">5</span><img class="landscape" src="images/5.png" width="659" height="435" alt=""></div>
+    <!-- 6: IMG_7723 7 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7833.JPG" data-coords="40.194453, 44.471251"><span class="photo-num">6</span><img class="landscape" src="images/6.png" width="659" height="435" alt=""></div>
+    <!-- 7: IMG_7801 3 — portrait 473×714 -->
+    <div class="photo-wrap" data-name="IMG_7900.JPG" data-coords="40.194701, 44.473434"><span class="photo-num">7</span><img class="portrait" src="images/7.png" width="473" height="714" alt=""></div>
+    <!-- 8: IMG_7723 8 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7824.JPG" data-coords="40.194453, 44.471251"><span class="photo-num">8</span><img class="landscape" src="images/8.png" width="659" height="435" alt=""></div>
+    <!-- 9: IMG_7723 9 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7878.JPG" data-coords="40.194453, 44.471251"><span class="photo-num">9</span><img class="landscape" src="images/9.png" width="659" height="435" alt=""></div>
+    <!-- 10: IMG_7723 10 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7850.JPG" data-coords="40.194453, 44.471251"><span class="photo-num">10</span><img class="landscape" src="images/10.png" width="659" height="435" alt=""></div>
+    <!-- 11: IMG_7801 4 — portrait 473×714 -->
+    <div class="photo-wrap" data-name="IMG_7885.JPG" data-coords="40.194701, 44.473434"><span class="photo-num">11</span><img class="portrait" src="images/11.png" width="473" height="714" alt=""></div>
+    <!-- 12: IMG_7723 11 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7803.JPG" data-coords="40.194217, 44.473550"><span class="photo-num">12</span><img class="landscape" src="images/12.png" width="659" height="435" alt=""></div>
+    <!-- 13: IMG_7801 5 — portrait 473×714 -->
+    <div class="photo-wrap" data-name="IMG_7899.JPG" data-coords="40.194453, 44.471251"><span class="photo-num">13</span><img class="portrait" src="images/13.png" width="473" height="714" alt=""></div>
+    <!-- 14: IMG_7723 12 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7867.JPG" data-coords="40.194217, 44.473550"><span class="photo-num">14</span><img class="landscape" src="images/14.png" width="659" height="435" alt=""></div>
+    <!-- 15: IMG_7799 1 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7819.JPG" data-coords="39.879122, 44.575120"><span class="photo-num">15</span><img class="portrait" src="images/15.png" width="474" height="714" alt=""></div>
+    <!-- 16: IMG_7723 4 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7841.JPG" data-coords="39.879122, 44.575120"><span class="photo-num">16</span><img class="landscape" src="images/16.png" width="659" height="435" alt=""></div>
+    <!-- 17: IMG_7799 2 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7872.JPG" data-coords="39.879122, 44.575120"><span class="photo-num">17</span><img class="portrait" src="images/17.png" width="474" height="714" alt=""></div>
+    <!-- 18: IMG_7723 6 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7828.JPG" data-coords="39.879122, 44.575120"><span class="photo-num">18</span><img class="landscape" src="images/18.png" width="659" height="435" alt=""></div>
+    <!-- 19: IMG_7723 5 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7856.JPG" data-coords="39.879122, 44.575120"><span class="photo-num">19</span><img class="landscape" src="images/19.png" width="659" height="435" alt=""></div>
+    <!-- 20: IMG_7799 5 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7901.JPG" data-coords="40.184126, 44.497104"><span class="photo-num">20</span><img class="portrait" src="images/20.png" width="474" height="714" alt=""></div>
+    <!-- 21: IMG_7723 13 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7837.JPG" data-coords="40.184126, 44.497104"><span class="photo-num">21</span><img class="landscape" src="images/21.png" width="659" height="435" alt=""></div>
+    <!-- 22: IMG_7799 3 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7880.JPG" data-coords="40.184126, 44.497104"><span class="photo-num">22</span><img class="portrait" src="images/22.png" width="474" height="714" alt=""></div>
+    <!-- 23: IMG_7723 14 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7806.JPG" data-coords="40.184126, 44.497104"><span class="photo-num">23</span><img class="landscape" src="images/23.png" width="659" height="435" alt=""></div>
+    <!-- 24: IMG_7799 4 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7864.JPG" data-coords="40.184126, 44.497104"><span class="photo-num">24</span><img class="portrait" src="images/24.png" width="474" height="714" alt=""></div>
+    <!-- 25: IMG_7723 15 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7821.JPG" data-coords="40.184126, 44.497104"><span class="photo-num">25</span><img class="landscape" src="images/25.png" width="659" height="435" alt=""></div>
+    <!-- 26: IMG_7799 6 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7890.JPG" data-coords="40.184126, 44.497104"><span class="photo-num">26</span><img class="portrait" src="images/26.png" width="474" height="714" alt=""></div>
+    <!-- 27: IMG_7723 16 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7844.JPG" data-coords="40.452492, 44.645551"><span class="photo-num">27</span><img class="landscape" src="images/27.png" width="659" height="435" alt=""></div>
+    <!-- 28: IMG_7723 17 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7875.JPG" data-coords="40.452492, 44.645551"><span class="photo-num">28</span><img class="landscape" src="images/28.png" width="659" height="435" alt=""></div>
+    <!-- 29: IMG_7723 18 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7812.JPG" data-coords="40.461340, 44.649832"><span class="photo-num">29</span><img class="landscape" src="images/29.png" width="659" height="435" alt=""></div>
+    <!-- 30: IMG_7799 7 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7853.JPG" data-coords="40.459910, 44.647875"><span class="photo-num">30</span><img class="portrait" src="images/30.png" width="474" height="714" alt=""></div>
+    <!-- 31: IMG_7799 8 — landscape 674×435 -->
+    <div class="photo-wrap" data-name="IMG_7888.JPG" data-coords="40.459910, 44.647875"><span class="photo-num">31</span><img class="landscape" src="images/31.png" alt=""></div>
+    <!-- 32: IMG_7799 9 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7830.JPG" data-coords="40.461340, 44.649832"><span class="photo-num">32</span><img class="portrait" src="images/32.png" width="474" height="714" alt=""></div>
+    <!-- 33: IMG_7723 20 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7869.JPG" data-coords="40.559186, 44.992376"><span class="photo-num">33</span><img class="landscape" src="images/33.png" width="659" height="435" alt=""></div>
+    <!-- 34: IMG_7723 21 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7802.JPG" data-coords="40.559186, 44.992376"><span class="photo-num">34</span><img class="landscape" src="images/34.png" width="659" height="435" alt=""></div>
+    <!-- 35: IMG_7723 22 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7895.JPG" data-coords="40.555443, 44.990234"><span class="photo-num">35</span><img class="landscape" src="images/35.png" width="659" height="435" alt=""></div>
+    <!-- 36: IMG_7799 10 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7849.JPG" data-coords="40.555443, 44.990234"><span class="photo-num">36</span><img class="portrait" src="images/36.png" width="474" height="714" alt=""></div>
+    <!-- 37: IMG_7723 23 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7826.JPG" data-coords="40.558389, 44.991480"><span class="photo-num">37</span><img class="landscape" src="images/37.png" width="659" height="435" alt=""></div>
+    <!-- 38: IMG_7723 24 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7870.JPG" data-coords="40.558389, 44.991480"><span class="photo-num">38</span><img class="landscape" src="images/38.png" width="659" height="435" alt=""></div>
+    <!-- 39: IMG_7799 11 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7858.JPG" data-coords="40.737584, 44.864817"><span class="photo-num">39</span><img class="portrait" src="images/39.png" width="474" height="714" alt=""></div>
+    <!-- 40: IMG_7723 25 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7817.JPG" data-coords="40.738249, 44.870621"><span class="photo-num">40</span><img class="landscape" src="images/40.png" width="659" height="435" alt=""></div>
+    <!-- 41: IMG_7799 12 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7882.JPG" data-coords="40.740049, 44.863534"><span class="photo-num">41</span><img class="portrait" src="images/41.png" width="474" height="714" alt=""></div>
+    <!-- 42: IMG_7723 26 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7835.JPG" data-coords="40.739068, 44.874233"><span class="photo-num">42</span><img class="landscape" src="images/42.png" width="659" height="435" alt=""></div>
+    <!-- 43: IMG_7723 27 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7900.JPG" data-coords="40.740638, 44.874662"><span class="photo-num">43</span><img class="landscape" src="images/43.png" width="659" height="435" alt=""></div>
+    <!-- 44: IMG_7799 13 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7860.JPG" data-coords="40.740638, 44.874662"><span class="photo-num">44</span><img class="portrait" src="images/44.png" width="474" height="714" alt=""></div>
+    <!-- 45: IMG_7723 28 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7823.JPG" data-coords="40.752270, 44.961519"><span class="photo-num">45</span><img class="landscape" src="images/45.png" width="659" height="435" alt=""></div>
+    <!-- 46: IMG_7723 29 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7897.JPG" data-coords="40.192820, 44.480215"><span class="photo-num">46</span><img class="landscape" src="images/46.png" width="659" height="435" alt=""></div>
+    <!-- 47: IMG_7723 30 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7842.JPG" data-coords="40.192820, 44.480215"><span class="photo-num">47</span><img class="landscape" src="images/47.png" width="659" height="435" alt=""></div>
+    <!-- 48: IMG_7799 14 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7877.JPG" data-coords="40.192820, 44.480215"><span class="photo-num">48</span><img class="portrait" src="images/48.png" width="474" height="714" alt=""></div>
+    <!-- 49: IMG_7723 32 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7810.JPG" data-coords="40.192820, 44.480215"><span class="photo-num">49</span><img class="landscape" src="images/49.png" width="659" height="435" alt=""></div>
+    <!-- 50: IMG_7799 15 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7855.JPG" data-coords="40.192820, 44.480215"><span class="photo-num">50</span><img class="portrait" src="images/50.png" width="474" height="714" alt=""></div>
+    <!-- 51: IMG_7723 33 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7889.JPG" data-coords="40.192820, 44.480215"><span class="photo-num">51</span><img class="landscape" src="images/51.png" width="659" height="435" alt=""></div>
+    <!-- 52: IMG_7799 16 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7832.JPG" data-coords="40.186428, 44.509741"><span class="photo-num">52</span><img class="portrait" src="images/52.png" width="474" height="714" alt=""></div>
+    <!-- 53: IMG_7723 34 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7865.JPG" data-coords="40.186428, 44.509741"><span class="photo-num">53</span><img class="landscape" src="images/53.png" width="659" height="435" alt=""></div>
+    <!-- 54: IMG_7723 37 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7805.JPG" data-coords="40.186428, 44.509741"><span class="photo-num">54</span><img class="landscape" src="images/54.png" width="659" height="435" alt=""></div>
+    <!-- 55: IMG_7799 17 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7893.JPG" data-coords="40.186428, 44.509741"><span class="photo-num">55</span><img class="portrait" src="images/55.png" width="474" height="714" alt=""></div>
+    <!-- 56: IMG_7723 35 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7846.JPG" data-coords="40.186428, 44.509741"><span class="photo-num">56</span><img class="landscape" src="images/56.png" width="659" height="435" alt=""></div>
+    <!-- 57: IMG_7723 36 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7829.JPG" data-coords="40.186428, 44.509741"><span class="photo-num">57</span><img class="landscape" src="images/57.png" width="659" height="435" alt=""></div>
+    <!-- 58: IMG_7799 18 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7873.JPG" data-coords="40.188937, 44.519554"><span class="photo-num">58</span><img class="portrait" src="images/58.png" width="474" height="714" alt=""></div>
+    <!-- 59: IMG_7723 38 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7851.JPG" data-coords="40.188937, 44.519554"><span class="photo-num">59</span><img class="landscape" src="images/59.png" width="659" height="435" alt=""></div>
+    <!-- 60: IMG_7723 39 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7814.JPG" data-coords="40.188937, 44.519554"><span class="photo-num">60</span><img class="landscape" src="images/60.png" width="659" height="435" alt=""></div>
+    <!-- 61: IMG_7723 41 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7884.JPG" data-coords="40.185151, 44.505797"><span class="photo-num">61</span><img class="landscape" src="images/61.png" width="659" height="435" alt=""></div>
+    <!-- 62: IMG_7799 19 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7838.JPG" data-coords="40.185151, 44.505797"><span class="photo-num">62</span><img class="portrait" src="images/62.png" width="474" height="714" alt=""></div>
+    <!-- 63: IMG_7723 40 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7868.JPG" data-coords="40.185151, 44.505797"><span class="photo-num">63</span><img class="landscape" src="images/63.png" width="659" height="435" alt=""></div>
+    <!-- 64: IMG_7799 20 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7808.JPG" data-coords="40.185151, 44.505797"><span class="photo-num">64</span><img class="portrait" src="images/64.png" width="474" height="714" alt=""></div>
+    <!-- 65: IMG_7723 42 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7898.JPG" data-coords="40.175865, 44.518225"><span class="photo-num">65</span><img class="landscape" src="images/65.png" width="659" height="435" alt=""></div>
+    <!-- 66: IMG_7799 21 — portrait 474×714 -->
+    <div class="photo-wrap" data-name="IMG_7840.JPG" data-coords="40.175865, 44.518225"><span class="photo-num">66</span><img class="portrait" src="images/66.png" width="474" height="714" alt=""></div>
+    <!-- 67: IMG_7723 43 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7820.JPG" data-coords="40.175865, 44.518225"><span class="photo-num">67</span><img class="landscape" src="images/67.png" width="659" height="435" alt=""></div>
+    <!-- 68: IMG_7723 44 — landscape 659×435 -->
+    <div class="photo-wrap" data-name="IMG_7879.JPG" data-coords="40.175865, 44.518225"><span class="photo-num">68</span><img class="landscape" src="images/68.png" width="659" height="435" alt=""></div>
+    <!-- 69: IMG_7723 31 — landscape 659×435 (same source as #49 in Figma) -->
+    <div class="photo-wrap" data-name="IMG_7723.JPG" data-coords="40.175865, 44.518225"><span class="photo-num">69</span><img class="landscape" src="images/49.png" width="659" height="435" alt=""></div>
+  </div>
+
+  <script>
+    const gallery = document.getElementById('gallery');
+    gallery.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      gallery.scrollLeft += e.deltaY + e.deltaX;
+    }, { passive: false });
+  </script>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal-text-col">
+      <div class="modal-info" id="modal-info"></div>
+    </div>
+    <div class="modal-photo-wrap" id="modal-photo-wrap">
+      <img class="modal-img" id="modal-img" src="" alt="">
+    </div>
+    <div class="modal-spacer"></div>
+  </div>
+
+  <script>
+    // gallery already declared above
+    const modal    = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalInfo= document.getElementById('modal-info');
+
+    const wraps = [...document.querySelectorAll('.photo-wrap')];
+    let current = 0;
+
+    function openModal(index) {
+      current = index;
+      showPhoto();
+      modal.classList.add('active');
+    }
+
+    function showPhoto() {
+      const wrap = wraps[current];
+      const img  = wrap.querySelector('img');
+      modalImg.src = img.src;
+      modalImg.style.maxHeight = img.classList.contains('portrait') ? '88vh' : '65vh';
+      const name   = wrap.dataset.name   || '';
+      const coords = wrap.dataset.coords || '';
+      modalInfo.innerHTML = name + '<br>' + coords;
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+    }
+
+    function prev() { current = (current - 1 + wraps.length) % wraps.length; showPhoto(); }
+    function next() { current = (current + 1) % wraps.length; showPhoto(); }
+
+    // Open on photo click
+    wraps.forEach((wrap, i) => wrap.addEventListener('click', () => openModal(i)));
+
+    // Close on overlay click (not on photo or arrows)
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.preventDefault();
+      if (!modal.classList.contains('active')) return;
+      if (e.key === 'ArrowLeft')  prev();
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'Escape')     closeModal();
+    });
+  </script>
+</body>
+</html>
