@@ -87,8 +87,11 @@
       background: rgba(255, 251, 246, 0.9);
       z-index: 100;
       align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
     .modal-overlay.active { display: flex; }
+    .modal-overlay.visible { opacity: 1; }
 
     .modal-text-col {
       flex: 1;
@@ -301,7 +304,7 @@
     const gallery = document.getElementById('gallery');
     gallery.addEventListener('wheel', function(e) {
       e.preventDefault();
-      gallery.scrollLeft += e.deltaY + e.deltaX;
+      gallery.scrollLeft += (e.deltaY + e.deltaX) * 0.6;
     }, { passive: false });
   </script>
 
@@ -329,6 +332,7 @@
       current = index;
       showPhoto();
       modal.classList.add('active');
+      requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add('visible')));
     }
 
     function showPhoto() {
@@ -342,7 +346,8 @@
     }
 
     function closeModal() {
-      modal.classList.remove('active');
+      modal.classList.remove('visible');
+      setTimeout(() => modal.classList.remove('active'), 300);
     }
 
     function prev() { current = (current - 1 + wraps.length) % wraps.length; showPhoto(); }
