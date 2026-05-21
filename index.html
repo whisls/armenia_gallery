@@ -46,16 +46,6 @@
     .nav-country  { left: 243px; }
     .nav-gallery  { left: 416px; }
 
-    /* Fixed coordinates block */
-    .coords {
-      position: fixed;
-      top: 74px;
-      left: 22px;
-      z-index: 20;
-      line-height: normal;
-    }
-    .coords p { margin: 0; }
-
     /* Horizontal gallery strip — bottom-aligned */
     .gallery {
       position: fixed;
@@ -135,47 +125,35 @@
     }
 
     .photo-wrap { cursor: pointer; }
+
+    /* Loader */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font);
+      font-size: 20px;
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
+
+  <!-- Loader -->
+  <div id="loader">0%</div>
+
+  <!-- Audio -->
+  <audio id="bg-audio" src="bg.mp3" loop></audio>
 
   <!-- Navigation -->
   <span class="nav nav-title">Travel book</span>
   <span class="nav nav-country">Армения</span>
   <span class="nav nav-gallery">Галлерея</span>
-
-  <!-- GPS coordinates -->
-  <div class="coords">
-    <p>40.189347, 44.515388</p>
-    <p>40.191203, 44.515553</p>
-    <p>40.191203, 44.515553</p>
-    <p>40.192414, 44.478374</p>
-    <p>40.194701, 44.473434</p>
-    <p>40.194701, 44.473434</p>
-    <p>40.194453, 44.471251</p>
-    <p>40.194701, 44.473434</p>
-    <p>40.194217, 44.473550</p>
-    <p>39.879122, 44.575120</p>
-    <p>40.184126, 44.497104</p>
-    <p>40.452492, 44.645551</p>
-    <p>40.461340, 44.649832</p>
-    <p>40.459910, 44.647875</p>
-    <p>40.559186, 44.992376</p>
-    <p>40.555443, 44.990234</p>
-    <p>40.558389, 44.991480</p>
-    <p>40.737584, 44.864817</p>
-    <p>40.738249, 44.870621</p>
-    <p>40.740049, 44.863534</p>
-    <p>40.739068, 44.874233</p>
-    <p>40.740638, 44.874662</p>
-    <p>40.740638, 44.874662</p>
-    <p>40.752270, 44.961519</p>
-    <p>40.192820, 44.480215</p>
-    <p>40.186428, 44.509741</p>
-    <p>40.188937, 44.519554</p>
-    <p>40.185151, 44.505797</p>
-    <p>40.175865, 44.518225</p>
-  </div>
+  <span class="nav nav-sound" id="sound-btn" onclick="toggleSound()" style="right:22px;left:auto;cursor:pointer;user-select:none;display:flex;align-items:center;" title="Включить звук"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 9H7L12 4V20L7 15H3V9Z" fill="black"/><line x1="16" y1="9" x2="22" y2="15" stroke="black" stroke-width="1.5" stroke-linecap="round"/><line x1="22" y1="9" x2="16" y2="15" stroke="black" stroke-width="1.5" stroke-linecap="round"/></svg></span>
 
   <!-- Photo gallery — order matches Figma design -->
   <div class="gallery" id="gallery">
@@ -384,6 +362,59 @@
       if (e.key === 'ArrowRight') next();
       if (e.key === 'Escape')     closeModal();
     });
+  </script>
+
+  <script>
+    // Loader
+    const loader = document.getElementById('loader');
+    const images = [...document.querySelectorAll('.gallery img')];
+    let loaded = 0;
+    const total = images.length;
+
+    function onLoad() {
+      loaded++;
+      const pct = Math.round((loaded / total) * 100);
+      loader.textContent = pct + '%';
+      if (loaded >= total) {
+        setTimeout(() => {
+          loader.style.transition = 'opacity 0.4s';
+          loader.style.opacity = '0';
+          setTimeout(() => loader.style.display = 'none', 400);
+          startAudio();
+        }, 200);
+      }
+    }
+
+    images.forEach(img => {
+      if (img.complete) onLoad();
+      else { img.addEventListener('load', onLoad); img.addEventListener('error', onLoad); }
+    });
+
+    // Audio
+    const audio = document.getElementById('bg-audio');
+    const soundBtn = document.getElementById('sound-btn');
+    const iconOn  = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 9H7L12 4V20L7 15H3V9Z" fill="black"/><path d="M15.5 8.5C16.5 9.5 17 10.7 17 12C17 13.3 16.5 14.5 15.5 15.5" stroke="black" stroke-width="1.5" stroke-linecap="round"/><path d="M18.5 5.5C20.4 7.4 21.5 9.6 21.5 12C21.5 14.4 20.4 16.6 18.5 18.5" stroke="black" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+    const iconOff = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 9H7L12 4V20L7 15H3V9Z" fill="black"/><line x1="16" y1="9" x2="22" y2="15" stroke="black" stroke-width="1.5" stroke-linecap="round"/><line x1="22" y1="9" x2="16" y2="15" stroke="black" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+    let audioStarted = false;
+    let muted = true;
+    audio.muted = true;
+
+    function startAudio() {
+      if (audioStarted) return;
+      audio.play().then(() => { audioStarted = true; }).catch(() => {});
+    }
+
+    function toggleSound() {
+      if (!audioStarted) {
+        audio.muted = false;
+        audio.play().then(() => { audioStarted = true; }).catch(() => {});
+        muted = false;
+      } else {
+        muted = !muted;
+        audio.muted = muted;
+      }
+      soundBtn.innerHTML = muted ? iconOff : iconOn;
+    }
   </script>
 </body>
 </html>
